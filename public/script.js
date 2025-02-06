@@ -1,4 +1,3 @@
-// public/script.js
 let displayValue = '0';
 const display = document.getElementById('display');
 
