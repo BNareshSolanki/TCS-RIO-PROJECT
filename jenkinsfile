@@ -1,0 +1,37 @@
+pipeline{
+    agent any
+    
+    stages{
+        stage("Code"){
+            steps {
+                echo "Cloning the code"
+                git url: "https://github.com/BNareshSolanki/TCS-RIO125-PROJECT.git", branch: "main"
+            }
+        }
+        
+        stage("Code Build") {
+            steps {
+                echo "Building the image"
+                sh "docker build -t calculator-app ."
+            }
+        }
+        stage("Push to DockerHub"){
+            steps{
+                echo "pushing to docker hub"
+                withCredentials([usernamePassword(credentialsId:"dockerHub",passwordVariable:"dockerHubPass",usernameVariable:"dockerHubUser")]){
+                     sh "docker tag calculator-app ${env.dockerHubUser}/calculator:latest"
+                     sh "docker login -u ${env.dockerHubUser} -p ${env.dockerHubPass}"
+                     sh "docker push ${env.dockerHubUser}/calculator-app:latest"
+                }
+               
+            }
+        }
+        stage("Deploy"){
+            steps{
+                echo "deploy"
+                sh "docker-compose down && docker-compose up -d"
+            }
+        }
+        
+    }
+}
